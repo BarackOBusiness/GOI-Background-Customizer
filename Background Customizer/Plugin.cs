@@ -2,6 +2,7 @@
 using BepInEx.Configuration;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Rendering;
 
 using System;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace Background_Customizer
     { // Creating all of the config entries
         private GradientColorKey[] TutoColorKey; private GradientColorKey[] ChimColorKey; private GradientColorKey[] SlideColorKey; private GradientColorKey[] FurniColorKey; private GradientColorKey[] OrangeColorKey; private GradientColorKey[] AnvilColorKey; private GradientColorKey[] BucketColorKey; private GradientColorKey[] IceColorKey; private GradientColorKey[] CreditsColorKey;
 
-        ConfigEntry<bool> Enabled;
+        ConfigEntry<bool> Enabled; ConfigEntry<bool> CloudsApplied;
         ConfigEntry<Color> Tut1; ConfigEntry<Color> Tut2; ConfigEntry<Color> Tut3; ConfigEntry<Color> TutSun; ConfigEntry<Color> TutFog; ConfigEntry<float> TutExposure; ConfigEntry<float> TutSaturation; ConfigEntry<float> TutContrast;
         ConfigEntry<Color> Chim1; ConfigEntry<Color> Chim2; ConfigEntry<Color> Chim3; ConfigEntry<Color> ChimSun; ConfigEntry<Color> ChimFog; ConfigEntry<float> ChimExposure; ConfigEntry<float> ChimSaturation; ConfigEntry<float> ChimContrast;
         ConfigEntry<Color> Slide1; ConfigEntry<Color> Slide2; ConfigEntry<Color> Slide3; ConfigEntry<Color> SlideSun; ConfigEntry<Color> SlideFog; ConfigEntry<float> SlideExposure; ConfigEntry<float> SlideSaturation; ConfigEntry<float> SlideContrast;
@@ -34,7 +35,8 @@ namespace Background_Customizer
 
                 Enabled = Config.Bind("", "User Agreement", false, new ConfigDescription("By clicking this checkbox you hereby agree that any ass configurations you use that lower visibility, hurt peoples eyes, or cannot be displayed correctly on certain hardware is your responsibility and by using said configurations that speedrun.com moderators may reject any runs using them at their discretion.", null, new ConfigurationManagerAttributes { Order = 1 }));
                 ApplySky = Config.Bind("", "Apply settings", false, "Click this to update your sky settings without having to restart and climb back up to see what's changed in higher areas");
-                
+                CloudsApplied = Config.Bind("", "Clouds", false, "Enables new set of clouds at anvil");
+
                 Tut1 = Config.Bind("1 Tutorial Sky", "Tutorial sky color 1", new Color(0.9254902f, 0.9647059f, 0.5882353f), "The lowest color in the gradient for the sky at tutorial.");
                 Tut2 = Config.Bind("1 Tutorial Sky", "Tutorial sky color 2", new Color(0.5372549f, 0.6392157f, 0.2980392f), "The middle color in the gradient for the sky at tutorial.");
                 Tut3 = Config.Bind("1 Tutorial Sky", "Tutorial sky color 3", new Color(0.1372549f, 0.4196078f, 0.3960784f), "The highest color in the gradient for the sky at tutorial.");
@@ -179,6 +181,114 @@ namespace Background_Customizer
                         SkyLoader(IceColorKey, GameObject.Find("SpaceSky").GetComponent<ColorSet>(), Ice1, Ice2, Ice3, IceSun, IceFog, IceExposure, IceSaturation, IceContrast);
                         SkyLoader(CreditsColorKey, GameObject.Find("CreditsSky").GetComponent<ColorSet>(), Credits1, Credits2, Credits3, CreditsSun, CreditsFog, CreditsExposure, CreditsSaturation, CreditsContrast);
                         GameObject.Find("CloudSystems/Stratus").GetComponent<FogVolume>()._AmbientColor = new Color(0.55f, 0.75f, 0.9f, 1f);
+                    }
+
+                    if (CloudsApplied.Value)
+                    {
+                        GameObject LeCloude = new GameObject("Le Aesthetic Clouds");
+                        Debug.Log("Clouds Created");
+                        LeCloude.transform.parent = GameObject.Find("CloudSystems").transform;
+                        Debug.Log("Clouds parented to CloudSystems");
+                        LeCloude.layer = 14;
+                        LeCloude.transform.localPosition = new Vector3(0f, -11f, 580f);
+                        FogVolume fogVolume = LeCloude.AddComponent<FogVolume>();
+                        LeCloude.GetComponent<Renderer>().lightProbeUsage = LightProbeUsage.Off;
+                        LeCloude.GetComponent<Renderer>().reflectionProbeUsage = ReflectionProbeUsage.Off;
+                        LeCloude.GetComponent<Renderer>().sortingOrder = 1;
+                        LeCloude.GetComponent<Renderer>().receiveShadows = false;
+                        LeCloude.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+                        LeCloude.GetComponent<BoxCollider>().size = new Vector3(3000f, 100f, 1000f);
+                        UnityEngine.Object.Destroy(GameObject.Find("Le aesthetic clouds/Le aesthetic clouds Shadow Camera"));
+                        FogVolume original = GameObject.Find("Cumulus").GetComponent<FogVolume>();
+                        fogVolume.FogMaterial.shaderKeywords = original.FogMaterial.shaderKeywords;
+                        fogVolume._3DNoiseScale = 20f;
+                        fogVolume._AmbientAffectsFogColor = true;
+                        fogVolume._AmbientColor = new Color32(byte.MaxValue, 230, 215, byte.MaxValue);
+                        fogVolume._BaseRelativeSpeed = 0.7f;
+                        fogVolume._BlendMode = FogVolumeRenderer.BlendMode.PremultipliedTransparency;
+                        fogVolume._Curl = 0.801f;
+                        fogVolume._DetailMaskingThreshold = 1f;
+                        fogVolume._DetailRelativeSpeed = 4.42f;
+                        fogVolume._DirectionalLighting = true;
+                        fogVolume._DirectionalLightingDistance = 0.00077f;
+                        fogVolume._FogColor = new Color(1f, 1f, 1f, 1f);
+                        fogVolume._FogType = FogVolume.FogType.Textured;
+                        fogVolume._HaloAbsorption = 0.481f;
+                        fogVolume._HaloIntensity = 20f;
+                        fogVolume._HaloOpticalDispersion = 3.76f;
+                        fogVolume._HaloRadius = 0.609f;
+                        fogVolume._HaloWidth = 0.849f;
+                        fogVolume._InspectorBackground = original._InspectorBackground;
+                        fogVolume._InspectorBackgroundIndex = 2;
+                        fogVolume._jitter = 0.0025f;
+                        fogVolume._LightExposure = 2f;
+                        fogVolume._LightHaloTexture = original._LightHaloTexture;
+                        fogVolume._NoiseDetailRange = 0.031f;
+                        fogVolume._NoiseVolume = original._NoiseVolume;
+                        fogVolume._OptimizationFactor = 5E-09f;
+                        fogVolume._PushAlpha = 1.002f;
+                        fogVolume._SceneIntersectionSoftness = 1.6f;
+                        fogVolume._SelfShadowSteps = 1;
+                        fogVolume._ShadowCamera = null;
+                        fogVolume._VortexAxis = FogVolume.VortexAxis.Y;
+                        fogVolume.Absorption = 0.492f;
+                        fogVolume.BaseTiling = 4.83f;
+                        fogVolume.Coverage = 1.89f;
+                        fogVolume.DetailDistance = 311.2f;
+                        fogVolume.DetailTiling = 3.1f;
+                        fogVolume.DirectLightingDistance = 10.15f;
+                        fogVolume.DirectLightingShadowDensity = 0.63f;
+                        fogVolume.DrawOrder = 1;
+                        fogVolume.EnableDistanceFields = true;
+                        fogVolume.EnableInscattering = true;
+                        fogVolume.EnableNoise = true;
+                        fogVolume.FadeDistance = 1008.61f;
+                        fogVolume.fogVolumeScale = original.fogVolumeScale;
+                        fogVolume.Gamma = 1f;
+                        fogVolume.Gradient = original.Gradient;
+                        fogVolume.GradMax = -1f;
+                        fogVolume.GradMax2 = 0.025f;
+                        fogVolume.GradMin = 0.792f;
+                        fogVolume.GradMin2 = -0.044f;
+                        fogVolume.HeightAbsorption = 1f;
+                        fogVolume.HeightAbsorptionMax = 0.168f;
+                        fogVolume.HeightAbsorptionMin = -0.07f;
+                        fogVolume.InscatteringIntensity = 1f;
+                        fogVolume.InscatteringShape = 0.426f;
+                        fogVolume.InscatteringStartDistance = 4f;
+                        fogVolume.Iterations = 120;
+                        fogVolume.IterationStep = 2000f;
+                        fogVolume.LambertianBias = 0.5f;
+                        fogVolume.LightExtinctionColor = new Color32(byte.MaxValue, 153, 180, byte.MaxValue);
+                        fogVolume.NoiseContrast = 12.62f;
+                        fogVolume.NoiseDensity = 5.01f;
+                        fogVolume.NoiseIntensity = 1f;
+                        fogVolume.NormalDistance = 0.00149f;
+                        fogVolume.PointLightingDistance = 600f;
+                        fogVolume.PointLightingDistance2Camera = 15f;
+                        fogVolume.PointLightsIntensity = 1.21f;
+                        fogVolume.PrimitivesRealTimeUpdate = false;
+                        fogVolume.RenderableInSceneView = false;
+                        fogVolume.rotation = 115f;
+                        fogVolume.RT_Opacity = null;
+                        fogVolume.RT_OpacityBlur = null;
+                        fogVolume.SceneCollision = false;
+                        fogVolume.ShadowBrightness = 3f;
+                        fogVolume.ShadowCameraGO = null;
+                        fogVolume.ShadowColor = new Color32(91, 37, 71, byte.MaxValue);
+                        fogVolume.ShadowCutoff = 0.199f;
+                        fogVolume.ShadowShift = 0.012f;
+                        fogVolume.Speed = new Vector4(0.25f, -0.33f, 0.65f, 0f);
+                        fogVolume.SphericalFadeDistance = 137.57f;
+                        fogVolume.Stretch = new Vector4(0f, 0f, 1f, 0f);
+                        fogVolume.useHeightGradient = true;
+                        fogVolume.Visibility = 87.7f;
+                        fogVolume.Vortex = 0.02f;
+                        Debug.Log("All properties and fields set");
+                        UnityEngine.Object.Destroy(LeCloude.GetComponent<FogVolumeLightManager>());
+                        UnityEngine.Object.Destroy(LeCloude.GetComponent<FogVolumePrimitiveManager>());
+                        GameObject.Find("CloudSystems/Cumulus/Primitive").transform.localScale = new Vector3(1200f, 180f, 477.347f);
+                        Debug.Log("Primitive of cumulus modifed.");
                     }
                 }
             }
