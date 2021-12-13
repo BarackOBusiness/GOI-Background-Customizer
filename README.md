@@ -16,5 +16,3 @@ To make contributions to the plugin, after cloning the repository, create a `lib
 
 Dependencies:
 * Assembly-CSharp
-
-I thought there were more referenced dependencies but like I don't know how these new bepinex project things work so like I guess if it compiles fine it works, don't ask (ever.) me

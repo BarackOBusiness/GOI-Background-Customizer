@@ -2,7 +2,6 @@
 using BepInEx.Configuration;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Rendering;
 
 using System;
 using System.Linq;
@@ -11,10 +10,10 @@ namespace Background_Customizer
 {
     [BepInPlugin("GOI.plugins.BackgroundMod", "Background Customizer", PluginInfo.PLUGIN_VERSION)]
     public class BackgroundCustomizer : BaseUnityPlugin
-    {
+    { // Creating all of the config entries
         private GradientColorKey[] TutoColorKey; private GradientColorKey[] ChimColorKey; private GradientColorKey[] SlideColorKey; private GradientColorKey[] FurniColorKey; private GradientColorKey[] OrangeColorKey; private GradientColorKey[] AnvilColorKey; private GradientColorKey[] BucketColorKey; private GradientColorKey[] IceColorKey; private GradientColorKey[] CreditsColorKey;
 
-        ConfigEntry<bool> Enabled; /* ConfigEntry<bool> CloudsApplied; */
+        ConfigEntry<bool> Enabled;
         ConfigEntry<Color> Tut1; ConfigEntry<Color> Tut2; ConfigEntry<Color> Tut3; ConfigEntry<Color> TutSun; ConfigEntry<Color> TutFog; ConfigEntry<float> TutExposure; ConfigEntry<float> TutSaturation; ConfigEntry<float> TutContrast;
         ConfigEntry<Color> Chim1; ConfigEntry<Color> Chim2; ConfigEntry<Color> Chim3; ConfigEntry<Color> ChimSun; ConfigEntry<Color> ChimFog; ConfigEntry<float> ChimExposure; ConfigEntry<float> ChimSaturation; ConfigEntry<float> ChimContrast;
         ConfigEntry<Color> Slide1; ConfigEntry<Color> Slide2; ConfigEntry<Color> Slide3; ConfigEntry<Color> SlideSun; ConfigEntry<Color> SlideFog; ConfigEntry<float> SlideExposure; ConfigEntry<float> SlideSaturation; ConfigEntry<float> SlideContrast;
@@ -29,12 +28,12 @@ namespace Background_Customizer
 
         void Awake()
         {
+            // Binding all of the configuration, pretty self explanatory, and pretty monotonous...
             try {
                 SceneManager.sceneLoaded += OnSceneLoaded;
 
                 Enabled = Config.Bind("", "User Agreement", false, new ConfigDescription("By clicking this checkbox you hereby agree that any ass configurations you use that lower visibility, hurt peoples eyes, or cannot be displayed correctly on certain hardware is your responsibility and by using said configurations that speedrun.com moderators may reject any runs using them at their discretion.", null, new ConfigurationManagerAttributes { Order = 1 }));
                 ApplySky = Config.Bind("", "Apply settings", false, "Click this to update your sky settings without having to restart and climb back up to see what's changed in higher areas");
-                // CloudsApplied = Config.Bind("", "Clouds", false, "Enables new set of clouds at anvil");
                 
                 Tut1 = Config.Bind("1 Tutorial Sky", "Tutorial sky color 1", new Color(0.9254902f, 0.9647059f, 0.5882353f), "The lowest color in the gradient for the sky at tutorial.");
                 Tut2 = Config.Bind("1 Tutorial Sky", "Tutorial sky color 2", new Color(0.5372549f, 0.6392157f, 0.2980392f), "The middle color in the gradient for the sky at tutorial.");
@@ -118,17 +117,21 @@ namespace Background_Customizer
                 CreditsContrast = Config.Bind("9 Space Sky", "Space Contrast", 1.68f, "The contrast in space, affects sky and background.");
 
             } catch (Exception ex) { Debug.LogException(ex); }
-            // Plugin startup logic
+            // Plugin startup logging
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
         }
 
         void Update()
         {
             try {
+                // Checks to make sure the user agreement is enabled and that the sky parameters need to be updated (the apply button was clicked)
+                // This should never run without ConfigurationManager as configuration file changes don't get updated ingame so there's no reason for an update ingame.
                 if (ApplySky.Value && Enabled.Value)
                 {
+                    // Since both tutorial and chimney sky are both named "SwampSky" in the game hierarchy, we have to separate them to customize them individually
                     GameObject[] SwampSkies = (from o in UnityEngine.Object.FindObjectsOfType<GameObject>() where o.name == "SwampSky" select o).ToArray<GameObject>();
 
+                    // Uses the SkyLoader function defined below to "cleanly" apply 
                     SkyLoader(TutoColorKey, SwampSkies[0].GetComponent<ColorSet>(), Tut1, Tut2, Tut3, TutSun, TutFog, TutExposure, TutSaturation, TutContrast);
                     SkyLoader(ChimColorKey, SwampSkies[1].GetComponent<ColorSet>(), Chim1, Chim2, Chim3, ChimSun, ChimFog, ChimExposure, ChimSaturation, ChimContrast);
                     SkyLoader(SlideColorKey, GameObject.Find("BlueSky").GetComponent<ColorSet>(), Slide1, Slide2, Slide3, SlideSun, SlideFog, SlideExposure, SlideSaturation, SlideContrast);
@@ -139,6 +142,8 @@ namespace Background_Customizer
                     SkyLoader(IceColorKey, GameObject.Find("SpaceSky").GetComponent<ColorSet>(), Ice1, Ice2, Ice3, IceSun, IceFog, IceExposure, IceSaturation, IceContrast);
                     SkyLoader(CreditsColorKey, GameObject.Find("CreditsSky").GetComponent<ColorSet>(), Credits1, Credits2, Credits3, CreditsSun, CreditsFog, CreditsExposure, CreditsSaturation, CreditsContrast);
                     ApplySky.Value = false;
+                    // Sets the enabled value to false because it's a button, you click it to apply something, if it was enabled continously that would be a dysfunctional button.
+                    // Hopefully whoever is reading this will understand better than the people who ask why the "apply settings" button doesn't stay enabled 
                 }
             } catch (Exception ex) { Debug.LogException(ex); }
         }
@@ -147,6 +152,7 @@ namespace Background_Customizer
         {
             try
             {
+                // Whenever the mian scene is loaded (default scene, but also loads on other maps) create the colorkeys and set parameters down below.
                 if (scene.name == "Mian")
                 {
                     TutoColorKey = new GradientColorKey[3];
@@ -174,114 +180,6 @@ namespace Background_Customizer
                         SkyLoader(CreditsColorKey, GameObject.Find("CreditsSky").GetComponent<ColorSet>(), Credits1, Credits2, Credits3, CreditsSun, CreditsFog, CreditsExposure, CreditsSaturation, CreditsContrast);
                         GameObject.Find("CloudSystems/Stratus").GetComponent<FogVolume>()._AmbientColor = new Color(0.55f, 0.75f, 0.9f, 1f);
                     }
-
-                    /* if (CloudsApplied.Value)
-                    {
-                        GameObject LeCloude = new GameObject("Le Aesthetic Clouds");
-                        Debug.Log("Clouds Created");
-                        LeCloude.transform.parent = GameObject.Find("CloudSystems").transform;
-                        Debug.Log("Clouds parented to CloudSystems");
-                        LeCloude.layer = 14;
-                        LeCloude.transform.localPosition = new Vector3(0f, -11f, 580f);
-                        FogVolume fogVolume = LeCloude.AddComponent<FogVolume>();
-                        LeCloude.GetComponent<Renderer>().lightProbeUsage = LightProbeUsage.Off;
-                        LeCloude.GetComponent<Renderer>().reflectionProbeUsage = ReflectionProbeUsage.Off;
-                        LeCloude.GetComponent<Renderer>().sortingOrder = 1;
-                        LeCloude.GetComponent<Renderer>().receiveShadows = false;
-                        LeCloude.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
-                        LeCloude.GetComponent<BoxCollider>().size = new Vector3(3000f, 100f, 1000f);
-                        UnityEngine.Object.Destroy(GameObject.Find("Le aesthetic clouds/Le aesthetic clouds Shadow Camera"));
-                        FogVolume original = GameObject.Find("Cumulus").GetComponent<FogVolume>();
-                        fogVolume.FogMaterial.shaderKeywords = original.FogMaterial.shaderKeywords;
-                        fogVolume._3DNoiseScale = 20f;
-                        fogVolume._AmbientAffectsFogColor = true;
-                        fogVolume._AmbientColor = new Color32(byte.MaxValue, 230, 215, byte.MaxValue);
-                        fogVolume._BaseRelativeSpeed = 0.7f;
-                        fogVolume._BlendMode = FogVolumeRenderer.BlendMode.PremultipliedTransparency;
-                        fogVolume._Curl = 0.801f;
-                        fogVolume._DetailMaskingThreshold = 1f;
-                        fogVolume._DetailRelativeSpeed = 4.42f;
-                        fogVolume._DirectionalLighting = true;
-                        fogVolume._DirectionalLightingDistance = 0.00077f;
-                        fogVolume._FogColor = new Color(1f, 1f, 1f, 1f);
-                        fogVolume._FogType = FogVolume.FogType.Textured;
-                        fogVolume._HaloAbsorption = 0.481f;
-                        fogVolume._HaloIntensity = 20f;
-                        fogVolume._HaloOpticalDispersion = 3.76f;
-                        fogVolume._HaloRadius = 0.609f;
-                        fogVolume._HaloWidth = 0.849f;
-                        fogVolume._InspectorBackground = original._InspectorBackground;
-                        fogVolume._InspectorBackgroundIndex = 2;
-                        fogVolume._jitter = 0.0025f;
-                        fogVolume._LightExposure = 2f;
-                        fogVolume._LightHaloTexture = original._LightHaloTexture;
-                        fogVolume._NoiseDetailRange = 0.031f;
-                        fogVolume._NoiseVolume = original._NoiseVolume;
-                        fogVolume._OptimizationFactor = 5E-09f;
-                        fogVolume._PushAlpha = 1.002f;
-                        fogVolume._SceneIntersectionSoftness = 1.6f;
-                        fogVolume._SelfShadowSteps = 1;
-                        fogVolume._ShadowCamera = null;
-                        fogVolume._VortexAxis = FogVolume.VortexAxis.Y;
-                        fogVolume.Absorption = 0.492f;
-                        fogVolume.BaseTiling = 4.83f;
-                        fogVolume.Coverage = 1.89f;
-                        fogVolume.DetailDistance = 311.2f;
-                        fogVolume.DetailTiling = 3.1f;
-                        fogVolume.DirectLightingDistance = 10.15f;
-                        fogVolume.DirectLightingShadowDensity = 0.63f;
-                        fogVolume.DrawOrder = 1;
-                        fogVolume.EnableDistanceFields = true;
-                        fogVolume.EnableInscattering = true;
-                        fogVolume.EnableNoise = true;
-                        fogVolume.FadeDistance = 1008.61f;
-                        fogVolume.fogVolumeScale = original.fogVolumeScale;
-                        fogVolume.Gamma = 1f;
-                        fogVolume.Gradient = original.Gradient;
-                        fogVolume.GradMax = -1f;
-                        fogVolume.GradMax2 = 0.025f;
-                        fogVolume.GradMin = 0.792f;
-                        fogVolume.GradMin2 = -0.044f;
-                        fogVolume.HeightAbsorption = 1f;
-                        fogVolume.HeightAbsorptionMax = 0.168f;
-                        fogVolume.HeightAbsorptionMin = -0.07f;
-                        fogVolume.InscatteringIntensity = 1f;
-                        fogVolume.InscatteringShape = 0.426f;
-                        fogVolume.InscatteringStartDistance = 4f;
-                        fogVolume.Iterations = 120;
-                        fogVolume.IterationStep = 2000f;
-                        fogVolume.LambertianBias = 0.5f;
-                        fogVolume.LightExtinctionColor = new Color32(byte.MaxValue, 153, 180, byte.MaxValue);
-                        fogVolume.NoiseContrast = 12.62f;
-                        fogVolume.NoiseDensity = 5.01f;
-                        fogVolume.NoiseIntensity = 1f;
-                        fogVolume.NormalDistance = 0.00149f;
-                        fogVolume.PointLightingDistance = 600f;
-                        fogVolume.PointLightingDistance2Camera = 15f;
-                        fogVolume.PointLightsIntensity = 1.21f;
-                        fogVolume.PrimitivesRealTimeUpdate = false;
-                        fogVolume.RenderableInSceneView = false;
-                        fogVolume.rotation = 115f;
-                        fogVolume.RT_Opacity = null;
-                        fogVolume.RT_OpacityBlur = null;
-                        fogVolume.SceneCollision = false;
-                        fogVolume.ShadowBrightness = 3f;
-                        fogVolume.ShadowCameraGO = null;
-                        fogVolume.ShadowColor = new Color32(91, 37, 71, byte.MaxValue);
-                        fogVolume.ShadowCutoff = 0.199f;
-                        fogVolume.ShadowShift = 0.012f;
-                        fogVolume.Speed = new Vector4(0.25f, -0.33f, 0.65f, 0f);
-                        fogVolume.SphericalFadeDistance = 137.57f;
-                        fogVolume.Stretch = new Vector4(0f, 0f, 1f, 0f);
-                        fogVolume.useHeightGradient = true;
-                        fogVolume.Visibility = 87.7f;
-                        fogVolume.Vortex = 0.02f;
-                        Debug.Log("All properties and fields set");
-                        UnityEngine.Object.Destroy(LeCloude.GetComponent<FogVolumeLightManager>());
-                        UnityEngine.Object.Destroy(LeCloude.GetComponent<FogVolumePrimitiveManager>());
-                        GameObject.Find("CloudSystems/Cumulus/Primitive").transform.localScale = new Vector3(1200f, 180f, 477.347f);
-                        Debug.Log("Primitive of cumulus modifed.");
-                    } */
                 }
             }
             catch (Exception ex) { Debug.LogException(ex); }
@@ -289,6 +187,8 @@ namespace Background_Customizer
 
         void SkyLoader(GradientColorKey[] Key, ColorSet SkySet, ConfigEntry<Color> One, ConfigEntry<Color> Two, ConfigEntry<Color> Three, ConfigEntry<Color> Sun, ConfigEntry<Color> Fog, ConfigEntry<float> Exposure, ConfigEntry<float> Saturation, ConfigEntry<float> Contrast)
         {
+            /* Here are all of the parameters for a ColorSet in Getting Over It, sky color is set by key which is loaded with the colors specified in config 
+            and further parameters go into the others. */
             Key[0].color = One.Value; Key[1].color = Two.Value; Key[2].color = Three.Value;
             Key[0].time = SkySet.sky.colorKeys[0].time; Key[1].time = SkySet.sky.colorKeys[1].time; Key[2].time = SkySet.sky.colorKeys[2].time;
             SkySet.sky.colorKeys = Key;
