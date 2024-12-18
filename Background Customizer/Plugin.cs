@@ -121,33 +121,6 @@ namespace Background_Customizer
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
         }
 
-        void Update()
-        {
-            try {
-                // Checks to make sure the user agreement is enabled and that the sky parameters need to be updated (the apply button was clicked)
-                // This should never run without ConfigurationManager as configuration file changes don't get updated ingame so there's no reason for an update ingame.
-                if (ApplySky.Value && Enabled.Value)
-                {
-                    // Since both tutorial and chimney sky are both named "SwampSky" in the game hierarchy, we have to separate them to customize them individually
-                    GameObject[] SwampSkies = (from o in UnityEngine.Object.FindObjectsOfType<GameObject>() where o.name == "SwampSky" select o).ToArray<GameObject>();
-
-                    // Uses the SkyLoader function defined below to "cleanly" apply 
-                    SkyLoader(TutoColorKey, SwampSkies[0].GetComponent<ColorSet>(), Tut1, Tut2, Tut3, TutSun, TutFog, TutExposure, TutSaturation, TutContrast);
-                    SkyLoader(ChimColorKey, SwampSkies[1].GetComponent<ColorSet>(), Chim1, Chim2, Chim3, ChimSun, ChimFog, ChimExposure, ChimSaturation, ChimContrast);
-                    SkyLoader(SlideColorKey, GameObject.Find("BlueSky").GetComponent<ColorSet>(), Slide1, Slide2, Slide3, SlideSun, SlideFog, SlideExposure, SlideSaturation, SlideContrast);
-                    SkyLoader(FurniColorKey, GameObject.Find("BlueSky (2)").GetComponent<ColorSet>(), Furni1, Furni2, Furni3, FurniSun, FurniFog, FurniExposure, FurniSaturation, FurniContrast);
-                    SkyLoader(OrangeColorKey, GameObject.Find("Sunset").GetComponent<ColorSet>(), Orange1, Orange2, Orange3, OrangeSun, OrangeFog, OrangeExposure, OrangeSaturation, OrangeContrast);
-                    SkyLoader(AnvilColorKey, GameObject.Find("Twilight").GetComponent<ColorSet>(), Anvil1, Anvil2, Anvil3, AnvilSun, AnvilFog, AnvilExposure, AnvilSaturation, AnvilContrast);
-                    SkyLoader(BucketColorKey, GameObject.Find("Twilight (2)").GetComponent<ColorSet>(), Bucket1, Bucket2, Bucket3, BucketSun, BucketFog, BucketExposure, BucketSaturation, BucketContrast);
-                    SkyLoader(IceColorKey, GameObject.Find("SpaceSky").GetComponent<ColorSet>(), Ice1, Ice2, Ice3, IceSun, IceFog, IceExposure, IceSaturation, IceContrast);
-                    SkyLoader(CreditsColorKey, GameObject.Find("CreditsSky").GetComponent<ColorSet>(), Credits1, Credits2, Credits3, CreditsSun, CreditsFog, CreditsExposure, CreditsSaturation, CreditsContrast);
-                    ApplySky.Value = false;
-                    // Sets the enabled value to false because it's a button, you click it to apply something, if it was enabled continously that would be a dysfunctional button.
-                    // Hopefully whoever is reading this will understand better than the people who ask why the "apply settings" button doesn't stay enabled 
-                }
-            } catch (Exception ex) { Debug.LogException(ex); }
-        }
-
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             try
