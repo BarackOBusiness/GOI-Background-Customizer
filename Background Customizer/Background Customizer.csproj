@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Background Customizer</AssemblyName>
     <Description>My second plugin</Description>
     <Version>1.1.1</Version>
@@ -13,12 +13,12 @@
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
-    <PackageReference Include="UnityEngine.Modules" Version="2020.3.6" IncludeAssets="compile" />
+    <PackageReference Include="UnityEngine.Modules" Version="2020.3.25" IncludeAssets="compile" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>./lib/Assembly-CSharp.dll</HintPath>
+      <HintPath>lib/Assembly-CSharp.dll</HintPath>
     </Reference>
   </ItemGroup>
 
