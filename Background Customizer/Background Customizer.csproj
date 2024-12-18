@@ -6,12 +6,25 @@
     <Description>My second plugin</Description>
     <Version>1.1.1</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>10.0</LangVersion>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='B5'">
+    <OutputPath>Release/BackgroundCustomizer.BepInEx5</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='B6'">
+    <OutputPath>Release/BackgroundCustomizer.BepInEx6</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(Configuration)'=='B5'">
+    <PackageReference Include="BepInEx.Core" Version="5.*" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)'=='B6'">
+    <PackageReference Include="BepInEx.Unity" Version="6.0.0-pre.*" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
-    <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
     <PackageReference Include="UnityEngine.Modules" Version="2020.3.25" IncludeAssets="compile" />
   </ItemGroup>

@@ -14,7 +14,8 @@ Running the game with the plugin installed will generate the necessary config fi
 You can edit the `GOI.plugins.BackgroundMod.cfg` file in that folder as per your preference, different sky zones are categorized into separate areas in the config file which you can configure there, as well as lighting values and fog.
 
 ## Building from source & development
-To make contributions to the plugin, after cloning the repository, create a `lib` folder in the `Background Customizer` folder.  In this folder you put all the referenced libraries which can be found in the game data folder, if a specified UnityEngine module is missing on compile time, put it into a `net45` folder inside of the libs folder.
+To make contributions to the plugin, after cloning the repository, create a `lib` folder in the `Background Customizer` folder.  In this folder you put all the referenced libraries which can be found in the game data folder.
+Once done, you can run `dotnet build` with the -c parameter specifying either B5 or B6 for BepInEx 5 or 6 respectively to generate a build.
 
 Dependencies:
-* Assembly-CSharp
+* Assembly-CSharp.dll
